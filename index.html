@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LIDL PLU">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>LIDL PLU Trainer - 116</title>
+<style>
+:root {
+  --blue:#0050aa;
+  --yellow:#fff000;
+  --red:#f0141e;
+  --green:#34c759;
+  --bg:#f0f2f5;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+* { box-sizing:border-box; }
+html, body {
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+button { font-family:inherit; cursor:pointer; }
+#app {
+  height:100dvh;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+#menu {
+  height:100%;
+  padding:calc(18px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.logo {
+  width:78px;
+  height:78px;
+  background:var(--blue);
+  border:4px solid var(--red);
+  border-radius:22px;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:21px;
+  margin-bottom:18px;
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+}
+h1 {
+  margin:0 0 6px;
+  color:var(--text);
+  font-size:24px;
+}
+.sub {
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:18px;
+}
+.menu-btn {
+  width:100%;
+  max-width:330px;
+  min-height:56px;
+  margin:7px 0;
+  border:0;
+  border-radius:14px;
+  background:white;
+  color:var(--blue);
+  font-size:17px;
+  font-weight:700;
+  box-shadow:0 4px 10px rgba(0,0,0,.10);
+}
+.menu-btn:active { transform:scale(.985); }
+.menu-btn.danger {
+  color:var(--red);
+  font-size:13px;
+  min-height:44px;
+  margin-top:22px;
+}
+#game {
+  display:none;
+  height:100%;
+  flex-direction:column;
+}
+.header {
+  padding:calc(9px + env(safe-area-inset-top)) 10px 10px;
+  background:var(--blue);
+  color:white;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.close {
+  width:42px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  font-weight:900;
+}
+.progress-bg {
+  flex:1;
+  height:9px;
+  background:rgba(255,255,255,.25);
+  border-radius:20px;
+  overflow:hidden;
+}
+#progress-bar {
+  width:0%;
+  height:100%;
+  background:var(--yellow);
+  border-radius:20px;
+  transition:width .25s ease;
+}
+#stat-count {
+  min-width:62px;
+  text-align:right;
+  font-size:13px;
+  font-weight:800;
+}
+.card-container {
+  flex:1;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+  perspective:1000px;
+}
+.card {
+  width:100%;
+  max-width:340px;
+  height:min(370px, 52dvh);
+  min-height:300px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform .35s ease;
+}
+.card.flipped { transform:rotateY(180deg); }
+.card-face {
+  position:absolute;
+  inset:0;
+  backface-visibility:hidden;
+  border-radius:22px;
+  background:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  box-shadow:0 10px 24px rgba(0,0,0,.16);
+  border:1px solid rgba(0,0,0,.08);
+}
+.card-back {
+  transform:rotateY(180deg);
+  background:var(--yellow);
+  color:var(--blue);
+  font-size:82px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.product-img {
+  width:100%;
+  max-height:220px;
+  object-fit:contain;
+}
+.product-name {
+  margin-top:14px;
+  font-size:19px;
+  line-height:1.2;
+  font-weight:800;
+  text-align:center;
+  color:var(--text);
+}
+.product-meta {
+  margin-top:7px;
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
+}
+.hint {
+  position:absolute;
+  top:10px;
+  right:12px;
+  min-width:28px;
+  height:28px;
+  padding:0 7px;
+  border-radius:99px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#eef2ff;
+  color:var(--blue);
+  font-size:12px;
+  font-weight:900;
+}
+.input-section {
+  background:white;
+  border-top:1px solid #ddd;
+  padding:12px 14px calc(18px + env(safe-area-inset-bottom));
+}
+#plu-display {
+  height:48px;
+  border:2px solid var(--blue);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:29px;
+  font-weight:900;
+  letter-spacing:3px;
+  background:#f9fafb;
+  color:var(--text);
+  margin-bottom:9px;
+}
+.numpad {
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:8px;
+}
+.btn {
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  background:#e5e7eb;
+  color:#111827;
+  font-size:22px;
+  font-weight:800;
+}
+.btn:active { transform:scale(.98); background:#d1d5db; }
+.btn-green { background:var(--green); color:white; }
+.btn-red { background:var(--red); color:white; }
+.feedback {
+  position:fixed;
+  left:50%;
+  top:calc(18px + env(safe-area-inset-top));
+  transform:translateX(-50%);
+  z-index:20;
+  padding:10px 14px;
+  border-radius:999px;
+  color:white;
+  font-size:14px;
+  font-weight:800;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+}
+.feedback.show { opacity:1; }
+.feedback.ok { background:var(--green); }
+.feedback.bad { background:var(--red); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="menu">
+    <div class="logo">LIDL</div>
+    <h1>PLU Trainer</h1>
+    <div class="sub">Всего товаров: <b id="total-val">0</b></div>
+
+    <button class="menu-btn" onclick="start('all')">Учить все (<span id="all-val">0</span>)</button>
+    <button class="menu-btn" onclick="start('unlearned')">Неизученные (<span id="un-val">0</span>)</button>
+    <button class="menu-btn" onclick="start('learned')">Изученные (<span id="l-val">0</span>)</button>
+
+    <button class="menu-btn danger" onclick="resetProgress()">Сбросить прогресс</button>
+  </div>
+
+  <div id="game">
+    <div class="header">
+      <div class="close" onclick="stop()">×</div>
+      <div class="progress-bg"><div id="progress-bar"></div></div>
+      <div id="stat-count">0/0</div>
+    </div>
+
+    <div class="card-container">
+      <div class="card" id="card" onclick="revealAsWrong()">
+        <div class="card-face">
+          <div class="hint" id="hint"></div>
+          <img id="img" class="product-img" src="" alt="" referrerpolicy="no-referrer">
+          <div id="name" class="product-name"></div>
+          <div id="meta" class="product-meta"></div>
+        </div>
+        <div class="card-face card-back" id="back"></div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div id="plu-display"></div>
+      <div class="numpad">
+        <button class="btn" onclick="tap('1')">1</button>
+        <button class="btn" onclick="tap('2')">2</button>
+        <button class="btn" onclick="tap('3')">3</button>
+        <button class="btn" onclick="tap('4')">4</button>
+        <button class="btn" onclick="tap('5')">5</button>
+        <button class="btn" onclick="tap('6')">6</button>
+        <button class="btn" onclick="tap('7')">7</button>
+        <button class="btn" onclick="tap('8')">8</button>
+        <button class="btn" onclick="tap('9')">9</button>
+        <button class="btn btn-red" onclick="clr()">C</button>
+        <button class="btn" onclick="tap('0')">0</button>
+        <button class="btn btn-green" onclick="ok()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="feedback" class="feedback"></div>
+
+<script>
+const db = [{"p":"572","n":"Apfeltasche","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"A","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-apfeltasche-mit-zuckerdekor_196_400x400.webp"},{"p":"813","n":"Bauernbaguette","c":"Bake-Off","g":"Bake - Off Baguette","h":"B","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bauernbaguette_381_400x400.webp"},{"p":"781","n":"Bauernbrötchen","c":"Bake-Off","g":"Bake - Off Brötchen","h":"B","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bauernbroetchen_11483_400x400.webp"},{"p":"935","n":"Bauernkruste","c":"Bake-Off","g":"Bake - Off Brot","h":"B","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bauernkruste_413_400x400.webp"},{"p":"744","n":"Bauernmildes","c":"Bake-Off","g":"Bake - Off Brot","h":"B","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bauernmildes_373_400x400.webp"},{"p":"861","n":"Berliner mit Mehrfruchtfüllung","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"BMM","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-berliner-mit-mehrfruchtfuellung_394_400x400.webp"},{"p":"841","n":"Biol. Sauerteigkruste mit Dinkel","c":"Bake-Off","g":"Bake - Off Brot","h":"BSMD","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-biol-wei-dinkel-mischb_9015_400x400.webp"},{"p":"811","n":"Bioland Steinofenbrötchen","c":"Bake-Off","g":"Bake - Off Brötchen","h":"BS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-doppelbroetchen_403_400x400.webp"},{"p":"715","n":"Bioland Vollkorn-Körner-Krusti","c":"Bake-Off","g":"Bake - Off Brötchen","h":"BVKK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bioland-vollkorn-koerner-krusti_6019_400x400.webp"},{"p":"730","n":"Bioland Vollkorn-Körnerlaib","c":"Bake-Off","g":"Bake - Off Brot","h":"BVK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bioland-vollkorn-koernerlaib_4794_400x400.webp"},{"p":"718","n":"Brezel mit Käse","c":"Bake-Off","g":"Bake - Off Laugengebäck","h":"BMK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-brezel-mit-kaese_1504_400x400.webp"},{"p":"785","n":"Briocheteig Croissant mit Pistazienfüllung","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"BCMP","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-briocheteig-croissant-mit-pistazienfuellung_9352_400x400.webp"},{"p":"991","n":"Butter-Croissant","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"BC","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-butter-croissant_398_400x400.webp"},{"p":"985","n":"Börek Spinat-Mizithra Feta Käse","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"BSMFK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-boerek-spinat-mizithra-feta-kaese_12093_400x400.webp"},{"p":"763","n":"Ciabatta","c":"Bake-Off","g":"Bake - Off Baguette","h":"C","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-ciabatta_1159_400x400.webp"},{"p":"814","n":"Crodot Hazelnut Crocanti (Aktion KW 22)","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"CHCAK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-crodot-hazelnut-crocanti-aktion-kw-34_10520_400x400.webp"},{"p":"905","n":"Dinkelvollkornbrötchen","c":"Bake-Off","g":"Bake - Off Brötchen","h":"D","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-dinkelvollkornbroetchen_11831_400x400.webp"},{"p":"965","n":"Fladenbrot Somun mit Kümmel und Sesam","c":"Bake-Off","g":"","h":"FSMKUS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-fladenbrot-somun-mit-kuemmel-und-sesam_1247_400x400.webp"},{"p":"693","n":"Franzbrötchen","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"F","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-franzbroetchen_7644_400x400.webp"},{"p":"148","n":"Griechische Spinattasche (Aktion KW 21)","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"GSAK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-griechische-spinattasche-aktion-kw-09_3441_400x400.webp"},{"p":"912","n":"Kaiserbrötchen","c":"Bake-Off","g":"Bake - Off Brötchen","h":"K","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-kaiserbroetchen_405_400x400.webp"},{"p":"915","n":"Knusperstange Käse-Kräuter (Aktion (KW20)","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"KKKAK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-knusperstange-kaese-kraeuter-aktion-kw20_12161_400x400.webp"},{"p":"713","n":"Knusperstange Käsetwister","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"KK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-knusperstange-kaesetwister_11479_400x400.webp"},{"p":"957","n":"Käse-Kürbis-Stange","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"KKS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-kaese-kuerbis-stange_193_400x400.webp"},{"p":"934","n":"Käse-Laugenstange","c":"Bake-Off","g":"Bake - Off Laugengebäck","h":"KL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-kaese-laugenstange_407_400x400.webp"},{"p":"803","n":"Körnerglück","c":"Bake-Off","g":"Bake - Off Brötchen","h":"K","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-koernerglueck_1386_400x400.webp"},{"p":"989","n":"Kürbiskernbrötchen","c":"Bake-Off","g":"Bake - Off Brötchen","h":"K","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-kuerbiskernbroetchen_157_400x400.webp"},{"p":"790","n":"Laugenbaguette","c":"Bake-Off","g":"Bake - Off Brot","h":"L","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-laugenbaguette_11752_400x400.webp"},{"p":"869","n":"Laugenbrötchen","c":"Bake-Off","g":"Bake - Off Laugengebäck","h":"L","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-laugenbroetchen_404_400x400.webp"},{"p":"688","n":"Laugeneck","c":"Bake-Off","g":"Bake - Off Laugengebäck","h":"L","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bioland-koerner-krusti_401_400x400.webp"},{"p":"987","n":"Meisterbrot mit Saaten","c":"Bake-Off","g":"Bake - Off Brot","h":"MMS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-meisterbrot-mit-saaten_372_400x400.webp"},{"p":"698","n":"Nuss Nougat Krapfen","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"NNK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-nuss-nougat-krapfen_8034_400x400.webp"},{"p":"928","n":"Nuss-Nougat-Croissant","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"NNC","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-nuss-nougat-croissant_9620_400x400.webp"},{"p":"843","n":"Pfeffer Focaccia","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"PF","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-pfeffer-focaccia_428_400x400.webp"},{"p":"951","n":"Pinky Donut","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"PD","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-pinky-donut_419_400x400.webp"},{"p":"896","n":"Pizza Donut Margherita (Aktion KW 20)","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"PDMAK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-pizza-donut-margherita_8047_400x400.webp"},{"p":"816","n":"Pizza Snack Salami","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"PSS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-pizza-snack-salami_9618_400x400.webp"},{"p":"745","n":"Roggenkruste","c":"Bake-Off","g":"Bake - Off Brot","h":"R","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-roggenkruste_374_400x400.webp"},{"p":"821","n":"Rustikales Körnerbaguette","c":"Bake-Off","g":"Bake - Off Baguette","h":"RK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-rustikales-koernerbaguette_9221_400x400.webp"},{"p":"868","n":"Rustikales Wurzelbrot","c":"Bake-Off","g":"Bake - Off Brot","h":"RW","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-rustikales-wurzelbrot_1162_400x400.webp"},{"p":"704","n":"Samen Sauerteigbrot","c":"Bake-Off","g":"Bake - Off Brot","h":"SS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-samen-sauerteigbrot_10616_400x400.webp"},{"p":"941","n":"Schinken-Käse-Croissant","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"SKC","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-schinken-kaese-croissant_9296_400x400.webp"},{"p":"900","n":"Schokobrötchen","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"S","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-schokobroetchen_1181_400x400.webp"},{"p":"937","n":"Schokodonut mit Schokostreusel","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"SMS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-schokodonut-mit-schokostreusel_397_400x400.webp"},{"p":"512","n":"Schwäbische Laugenbrezel","c":"Bake-Off","g":"Bake - Off Laugengebäck","h":"SL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-bayerische-laugenbrezel-rohling_409_400x400.webp"},{"p":"694","n":"Simit Sesamring","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"SS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-simit-sesamring_1194_400x400.webp"},{"p":"782","n":"Sonnencrusti","c":"Bake-Off","g":"Bake - Off Brötchen","h":"S","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-sonnencrusti_1208_400x400.webp"},{"p":"996","n":"Vanille Berliner","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"VB","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-vanille-berliner_10932_400x400.webp"},{"p":"849","n":"Vanillestange","c":"Bake-Off","g":"Bake - Off Süße Teilchen","h":"V","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-vanillestange_12091_400x400.webp"},{"p":"918","n":"Weizenbrötchen","c":"Bake-Off","g":"Bake - Off Brötchen","h":"W","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-weizenbroetchen_406_400x400.webp"},{"p":"992","n":"Weltmeisterbrötchen","c":"Bake-Off","g":"Bake - Off Brötchen","h":"W","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-weltmeisterbroetchen_158_400x400.webp"},{"p":"938","n":"Wienerle Croissant","c":"Bake-Off","g":"Bake -Off Herzhaft","h":"WC","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-bake-off-wienerle-croissant_27_400x400.webp"},{"p":"90","n":"Auberginen","c":"Gemüse","g":"Feingemüse/ Gurken","h":"A","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-auberginen_178_400x400.webp"},{"p":"409","n":"Bio Gurken","c":"Gemüse","g":"Feingemüse/ Gurken","h":"BG","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-bio-gurken_187_400x400.webp"},{"p":"27","n":"Bio Hokkaido","c":"Gemüse","g":"Grobgemüse","h":"BH","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-bio-hokkaido_292_400x400.webp"},{"p":"38","n":"Bio Ingwer (lose)","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"BIL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-bio-ingwer-lose_159_400x400.webp"},{"p":"64","n":"Bioland Möhren","c":"Gemüse","g":"Grobgemüse","h":"BM","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-bioland-moehren_2756_400x400.webp"},{"p":"99","n":"Cherrystrauchtomaten (lose)","c":"Gemüse","g":"Tomaten/ Paprika","h":"CL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-cherrystrauchtomaten-lose_191_400x400.webp"},{"p":"80","n":"Chinakohl (lose)","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"CL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-chinakohl-lose_195_400x400.webp"},{"p":"83","n":"Fenchel","c":"Gemüse","g":"Grobgemüse","h":"F","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-fenchel_197_400x400.webp"},{"p":"310","n":"Gurken (lose)","c":"Gemüse","g":"Feingemüse/ Gurken","h":"GL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-gurken-lose_258_400x400.webp"},{"p":"82","n":"Knollensellerie (lose)","c":"Gemüse","g":"Grobgemüse","h":"KL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-knollensellerie-lose_199_400x400.webp"},{"p":"202","n":"Kohlrabi (lose)","c":"Gemüse","g":"Grobgemüse","h":"KL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-kohlrabi-lose_255_400x400.webp"},{"p":"140","n":"Lauchzwiebeln","c":"Gemüse","g":"Feingemüse/ Gurken","h":"L","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-lauchzwiebeln_254_400x400.webp"},{"p":"210","n":"Möhren mit Grün","c":"Gemüse","g":"Grobgemüse","h":"MMG","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-moehren-mit-gruen_200_400x400.webp"},{"p":"222","n":"Porree","c":"Gemüse","g":"Feingemüse/ Gurken","h":"P","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-porree_1580_400x400.webp"},{"p":"150","n":"Radieschen","c":"Gemüse","g":"Feingemüse/ Gurken","h":"R","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-radieschen_170_400x400.webp"},{"p":"203","n":"Romanesco","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"R","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-romanesco_12088_400x400.webp"},{"p":"86","n":"Rotkohl","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"R","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-rotkohl_553_400x400.webp"},{"p":"35","n":"Speisekürbis Muskat","c":"Gemüse","g":"","h":"SM","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-speisekuerbis-muskat_11229_400x400.webp"},{"p":"87","n":"Spitzkohl (lose)","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"SL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-spitzkohl-lose_231_400x400.webp"},{"p":"283","n":"Staudensellerie","c":"Gemüse","g":"Grobgemüse","h":"S","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-staudensellerie_208_400x400.webp"},{"p":"97","n":"Strauchtomaten (lose)","c":"Gemüse","g":"Tomaten/ Paprika","h":"SL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-strauchtomaten-lose_172_400x400.webp"},{"p":"25","n":"Süßkartoffeln (lose)","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"SL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-suesskartoffeln-lose_229_400x400.webp"},{"p":"85","n":"Wirsing","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"W","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-wirsing_1215_400x400.webp"},{"p":"93","n":"Zucchini","c":"Gemüse","g":"Feingemüse/ Gurken","h":"Z","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-zucchini_175_400x400.webp"},{"p":"95","n":"Zwiebeln weiß süß (lose)","c":"Gemüse","g":"Knollengemüse/ Kohlarten","h":"ZWSL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-gemuese-zwiebeln-weiss-suess-lose_212_400x400.webp"},{"p":"770","n":"Coca Cola Original 0,33l","c":"Getränke","g":"","h":"CCOL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-getraenke-coca-cola-original_242_400x400.webp"},{"p":"728","n":"Coca-Cola Softdrinks sort. (6+2Gratis)","c":"Getränke","g":"","h":"CCSSG","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-getraenke-coca-cola-softdrinks-sort-6-2gratis_9461_400x400.webp"},{"p":"706","n":"Pepsi/Schwip Schwap sort. 0,5l","c":"Getränke","g":"","h":"PSSSL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-getraenke-pepsi-schwip-schwap-sort_239_400x400.webp"},{"p":"57","n":"Walnüsse","c":"Nüsse","g":"Beeren/ Trauben/ Nüsse","h":"W","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-nuesse-walnuesse_1256_400x400.webp"},{"p":"59","n":"Ananas","c":"Obst","g":"Exoten/ Bananen","h":"A","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-ananas_4890_400x400.webp"},{"p":"15","n":"Apfel grün, fruchtig süß (lose)","c":"Obst","g":"Fruchtig süß, Kernobst/ Steinobst","h":"AGFSL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-apfel-gruen-fruchtig-suess_115_400x400.webp"},{"p":"16","n":"Apfel Pink Lady  (lose)","c":"Obst","g":"Fruchtig süß, Kernobst/ Steinobst","h":"APLL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-apfel-pink-lose_177_400x400.webp"},{"p":"47","n":"Apfel rot, fruchtig-süß (lose)","c":"Obst","g":"Fruchtig süß, Kernobst/ Steinobst","h":"ARFSL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-apfel-rot-fruchtig-suess_176_400x400.webp"},{"p":"40","n":"Aprikosen (lose)","c":"Obst","g":"Kernobst/ Steinobst","h":"AL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-aprikosen-lose_294_400x400.webp"},{"p":"621","n":"Avocado (lose)","c":"Obst","g":"Exoten/ Bananen","h":"AL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-avocado-lose_95_400x400.webp"},{"p":"55","n":"Bananen","c":"Obst","g":"Exoten/ Bananen","h":"B","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-bananen_71_400x400.webp"},{"p":"415","n":"Bio Zitronen","c":"Obst","g":"Zitrusfrüchte","h":"BZ","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-bio-zitronen_261_400x400.webp"},{"p":"20","n":"Birnen (lose)","c":"Obst","g":"Kernobst/ Steinobst","h":"BL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-birnen_179_400x400.webp"},{"p":"17","n":"Birnen rot","c":"Obst","g":"Kernobst/ Steinobst","h":"BR","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-birnen-rot_241_400x400.webp"},{"p":"21","n":"Cantaloupemelonen","c":"Obst","g":"Melonen","h":"C","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-cantaloupemelonen_1237_400x400.webp"},{"p":"70","n":"Erdbeeren","c":"Obst","g":"Beeren/ Trauben/ Nüsse","h":"E","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-erdbeeren_8826_400x400.webp"},{"p":"640","n":"Fairtrade Avocado","c":"Obst","g":"Kernobst/ Steinobst","h":"FA","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-fairtrade-avocado_11192_400x400.webp"},{"p":"48","n":"Fairtrade Bananen","c":"Obst","g":"Exoten/ Bananen","h":"FB","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-fairtrade-bananen_352_400x400.webp"},{"p":"45","n":"Fairtrade Bio Bananen","c":"Obst","g":"Exoten/ Bananen","h":"FBB","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-fairtrade-bio-bananen_59_400x400.webp"},{"p":"11","n":"Galiamelone","c":"Obst","g":"Melonen","h":"G","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-galiamelone_7517_400x400.webp"},{"p":"622","n":"Granatapfel","c":"Obst","g":"Exoten/ Bananen","h":"G","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-granatapfel_91_400x400.webp"},{"p":"608","n":"Grapefruit","c":"Obst","g":"Zitrusfrüchte","h":"G","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-grapefruit_114_400x400.webp"},{"p":"51","n":"Grapefruit grün","c":"Obst","g":"Zitrusfrüchte","h":"GG","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-grapefruit-gruen_11437_400x400.webp"},{"p":"29","n":"Honigmelone lose","c":"Obst","g":"Melonen","h":"HL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-honigmelone_1413_400x400.webp"},{"p":"624","n":"Kiwi (lose)","c":"Obst","g":"Exoten/ Bananen","h":"KL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-kiwi_99_400x400.webp"},{"p":"636","n":"Kiwi gold","c":"Obst","g":"Exoten/ Bananen","h":"KG","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-kiwi-gold_308_400x400.webp"},{"p":"63","n":"Mandarinen/Clementinen","c":"Obst","g":"Zitrusfrüchte","h":"MC","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-mandarinen-clementinen_8303_400x400.webp"},{"p":"627","n":"Mango (lose)","c":"Obst","g":"Exoten/ Bananen","h":"ML","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-mango-lose_102_400x400.webp"},{"p":"519","n":"Nashi Birnen (lose)","c":"Obst","g":"Kernobst/ Steinobst","h":"NBL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-nashi-birnen-lose_201_400x400.webp"},{"p":"41","n":"Nektarinen (lose)","c":"Obst","g":"Kernobst/ Steinobst","h":"NL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-nektarinen_47_400x400.webp"},{"p":"36","n":"Nektarinen in Tragetasche","c":"Obst","g":"Kernobst/ Steinobst","h":"NIT","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-nektarinen-in-tragetasche_6047_400x400.webp"},{"p":"65","n":"Orangen lose","c":"Obst","g":"Zitrusfrüchte","h":"OL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-orangen-lose_1414_400x400.webp"},{"p":"71","n":"Papaya","c":"Obst","g":"Exoten/ Bananen","h":"P","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-papaya_11177_400x400.webp"},{"p":"50","n":"Pflaumen dunkel","c":"Obst","g":"Kernobst/ Steinobst","h":"PD","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-pflaumen-dunkel_70_400x400.webp"},{"p":"37","n":"Trauben dunkel kernlos (lose)","c":"Obst","g":"Beeren/ Trauben/ Nüsse","h":"TDKL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-trauben-dunkel-kernlos-lose_211_400x400.webp"},{"p":"33","n":"Trauben hell kernlos (lose)","c":"Obst","g":"Beeren/ Trauben/ Nüsse","h":"THKL","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-trauben-hell-kernlos_173_400x400.webp"},{"p":"79","n":"Wassermelonen","c":"Obst","g":"Melonen","h":"W","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-wassermelonen_10104_400x400.webp"},{"p":"78","n":"Wassermelonen, kernarm","c":"Obst","g":"Melonen","h":"WK","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-wassermelonen-kernarm_37_400x400.webp"},{"p":"108","n":"Zuckermelonen, Piel de Sapo","c":"Obst","g":"Melonen","h":"ZPDS","i":"https://easy-plu.knowledge-hero.com/plufiles/product/deutschland-obst-zuckermelonen-piel-de-sapo_5115_400x400.webp"}];
+
+const STORAGE_KEY = "lidl_plu_learned_v2";
+let learned = loadLearned();
+let queue = [];
+let curr = null;
+let val = "";
+let sessionTotal = 0;
+let sessionDone = 0;
+let locked = false;
+
+function storageAvailable() {
+  try {
+    const test = "__test__";
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+const canStore = storageAvailable();
+
+function loadLearned() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.map(String) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveLearned() {
+  if (!canStore) return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...new Set(learned)]));
+}
+
+function markLearned(plu) {
+  plu = String(plu);
+  if (!learned.includes(plu)) learned.push(plu);
+  saveLearned();
+}
+
+function markUnlearned(plu) {
+  plu = String(plu);
+  learned = learned.filter(x => x !== plu);
+  saveLearned();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function updateMenuStats() {
+  const learnedClean = learned.filter(p => db.some(x => x.p === p));
+  if (learnedClean.length !== learned.length) {
+    learned = learnedClean;
+    saveLearned();
+  }
+  const total = db.length;
+  const learnedCount = learned.length;
+  document.getElementById("total-val").innerText = total;
+  document.getElementById("all-val").innerText = total;
+  document.getElementById("un-val").innerText = total - learnedCount;
+  document.getElementById("l-val").innerText = learnedCount;
+}
+
+function start(mode) {
+  if (mode === "all") queue = [...db];
+  else if (mode === "unlearned") queue = db.filter(x => !learned.includes(x.p));
+  else queue = db.filter(x => learned.includes(x.p));
+
+  if (queue.length === 0) {
+    alert("Список пуст.");
+    updateMenuStats();
+    return;
+  }
+
+  shuffle(queue);
+  sessionTotal = queue.length;
+  sessionDone = 0;
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("game").style.display = "flex";
+  next();
+}
+
+function stop() {
+  document.getElementById("menu").style.display = "flex";
+  document.getElementById("game").style.display = "none";
+  updateMenuStats();
+}
+
+function next() {
+  locked = false;
+  if (queue.length === 0) {
+    showFeedback("Готово", true);
+    stop();
+    return;
+  }
+
+  curr = queue[0];
+  val = "";
+
+  const img = document.getElementById("img");
+  img.src = curr.i;
+  img.alt = curr.n;
+  img.onerror = function() {
+    this.style.display = "none";
+  };
+  img.onload = function() {
+    this.style.display = "block";
+  };
+
+  document.getElementById("name").innerText = curr.n;
+  document.getElementById("meta").innerText = [curr.c, curr.g].filter(Boolean).join(" - ");
+  document.getElementById("hint").innerText = curr.h || "";
+  document.getElementById("hint").style.display = curr.h ? "flex" : "none";
+  document.getElementById("back").innerText = curr.p;
+  document.getElementById("card").classList.remove("flipped");
+
+  updateDisplay();
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = sessionDone;
+  document.getElementById("stat-count").innerText = `${done}/${sessionTotal}`;
+  document.getElementById("progress-bar").style.width = sessionTotal ? (done / sessionTotal * 100) + "%" : "0%";
+}
+
+function tap(n) {
+  if (locked || !curr) return;
+  if (val.length < 4) {
+    val += n;
+    updateDisplay();
+  }
+}
+
+function clr() {
+  if (locked) return;
+  val = "";
+  updateDisplay();
+}
+
+function updateDisplay() {
+  document.getElementById("plu-display").innerText = val;
+}
+
+function showFeedback(text, isOk) {
+  const el = document.getElementById("feedback");
+  el.textContent = text;
+  el.className = "feedback show " + (isOk ? "ok" : "bad");
+  setTimeout(() => {
+    el.className = "feedback";
+  }, 900);
+}
+
+function correctCurrent() {
+  markLearned(curr.p);
+  queue.shift();
+  sessionDone += 1;
+  showFeedback("Верно", true);
+  next();
+}
+
+function failCurrent() {
+  markUnlearned(curr.p);
+  const failed = queue.shift();
+  queue.push(failed);
+  showFeedback("Неверно", false);
+  sessionDone += 1;
+  setTimeout(next, 1100);
+}
+
+function ok() {
+  if (locked || !curr) return;
+  locked = true;
+  if (val === curr.p) {
+    correctCurrent();
+  } else {
+    document.getElementById("card").classList.add("flipped");
+    failCurrent();
+  }
+}
+
+function revealAsWrong() {
+  if (locked || !curr) return;
+  locked = true;
+  document.getElementById("card").classList.add("flipped");
+  markUnlearned(curr.p);
+  const failed = queue.shift();
+  queue.push(failed);
+  sessionDone += 1;
+  showFeedback("Открыто - в неизученные", false);
+  setTimeout(next, 1200);
+}
+
+function resetProgress() {
+  if (confirm("Сбросить весь прогресс?")) {
+    learned = [];
+    if (canStore) localStorage.removeItem(STORAGE_KEY);
+    updateMenuStats();
+  }
+}
+
+window.addEventListener("load", updateMenuStats);
+</script>
+</body>
+</html>
